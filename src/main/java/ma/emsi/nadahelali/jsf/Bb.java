@@ -226,6 +226,13 @@ public class Bb implements Serializable {
                     are you tell them the average price of a meal.
                     """;
             this.listeRolesSysteme.add(new SelectItem(role, "Guide touristique"));
+            role = """
+        You are an AI technical interview coach.
+        Ask the user one technical question about artificial intelligence at a time.
+        Evaluate their answer, explain their mistakes and suggest improvements.
+        Adapt the difficulty according to their answers.
+        """;
+            this.listeRolesSysteme.add(new SelectItem(role, "Coach entretien IA"));
         }
 
         return this.listeRolesSysteme;
