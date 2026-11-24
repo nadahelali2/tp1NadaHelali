@@ -6,10 +6,12 @@ import jakarta.faces.model.SelectItem;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import ma.emsi.nadahelali.service.GenerateurReponse;
+import ma.emsi.nadahelali.llm.JsonAdapterPourGemini;
+import ma.emsi.nadahelali.llm.LlmInteraction;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -48,16 +50,17 @@ public class Bb implements Serializable {
      */
     private String reponse;
 
+    private boolean debug;
+    private String texteRequeteJson;
+    private String texteReponseJson;
+
     /**
      * La conversation depuis le début.
      */
     private StringBuilder conversation = new StringBuilder();
 
-    /**
-     * Service pour modifier la question et générer la réponse.
-     */
     @Inject
-    private GenerateurReponse generateurReponse;
+    private JsonAdapterPourGemini jsonAdapter;
 
     /**
      * Contexte JSF. Utilisé pour qu'un message d'erreur s'affiche dans le formulaire.
@@ -95,6 +98,30 @@ public class Bb implements Serializable {
         return reponse;
     }
 
+    public boolean isDebug() {
+        return debug;
+    }
+
+    public void setDebug(boolean debug) {
+        this.debug = debug;
+    }
+
+    public String getTexteRequeteJson() {
+        return texteRequeteJson;
+    }
+
+    public void setTexteRequeteJson(String texteRequeteJson) {
+        this.texteRequeteJson = texteRequeteJson;
+    }
+
+    public String getTexteReponseJson() {
+        return texteReponseJson;
+    }
+
+    public void setTexteReponseJson(String texteReponseJson) {
+        this.texteReponseJson = texteReponseJson;
+    }
+
     /**
      * setter indispensable pour le textarea.
      *
@@ -114,9 +141,6 @@ public class Bb implements Serializable {
 
     /**
      * Envoie la question au serveur.
-     * En attendant de l'envoyer à un LLM, le serveur fait un traitement quelconque, juste pour tester :
-     * Le traitement consiste à copier la question en minuscules et à l'entourer avec "||". Le rôle système
-     * est ajouté au début de la première réponse.
      *
      * @return null pour rester sur la même page.
      */
@@ -130,13 +154,25 @@ public class Bb implements Serializable {
         }
 
         // Traite la question pour construire la réponse.
-        String roleSystemePourModification = null;
         if (this.conversation.isEmpty()) { // Si la conversation n'a pas encore commencé
-            roleSystemePourModification = this.roleSysteme; // Pour GenerateurReponse.modifier()
+            jsonAdapter.setSystemRole(this.roleSysteme);
             // Invalide la liste pour changer le rôle système
             this.roleSystemeChangeable = false;
         }
-        this.reponse += this.generateurReponse.genererReponse(this.question, roleSystemePourModification);
+
+        try {
+            LlmInteraction interaction = jsonAdapter.envoyerRequete(question);
+            this.reponse = interaction.reponseExtraite();
+            this.texteRequeteJson = interaction.questionJson();
+            this.texteReponseJson = interaction.reponseJson();
+        } catch (Exception e) {
+            this.reponse = "Erreur : " + e.getMessage();
+            FacesMessage message =
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                            "Problème de connexion avec l'API du LLM",
+                            "Problème de connexion avec l'API du LLM" + e.getMessage() + "\n" + Arrays.toString(e.getStackTrace()));
+            facesContext.addMessage(null, message);
+        }
 
         // La conversation contient l'historique des questions-réponses depuis le début.
         afficherConversation();
