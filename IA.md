@@ -8,10 +8,10 @@ Je ne savais pas exactement comment déclarer un record en Java.
 ### Raison de l'utilisation de l'IA
 Pour comprendre la syntaxe d'un record.
 
-### Prompt utilisé (reformulé)
+### Prompt utilisé 
 Comment créer un record en Java avec trois attributs de type String ?
 
-### Réponse de l'IA (reconstituée)
+### Réponse de l'IA 
 En Java, tu peux utiliser le mot-clé record pour déclarer
 une classe contenant des données. Il suffit de préciser
 le type et le nom de chaque attribut entre parenthèses.
@@ -30,10 +30,10 @@ de ma première question.
 ### Raison de l'utilisation de l'IA
 Pour comprendre pourquoi l'historique ne fonctionnait pas.
 
-### Prompt utilisé (reformulé)
+### Prompt utilisé 
 Pourquoi Gemini ne garde pas le contexte de ma première question ?
 
-### Réponse de l'IA (reconstituée)
+### Réponse de l'IA 
 Vérifie dans le mode debug si la requête JSON contient
 les messages précédents. Refais un test avec deux questions
 successives sans recharger la page ni effacer la conversation.
